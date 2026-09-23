@@ -31,7 +31,7 @@ erDiagram
 | `teams` | Top-level ownership boundary |
 | `users` | GitHub users and optional Supabase Auth linkage |
 | `team_members` | Team membership and role |
-| `projects` | Repository and GitHub Project identity, metadata, and field definitions |
+| `projects` | Repository and GitHub Project identity and metadata |
 | `statuses` | Project-specific Kanban status and ordering |
 | `milestones` | GitHub milestone metadata |
 | `tasks` | GitHub Issues placed on the Kanban board |
@@ -46,19 +46,15 @@ Stores the repository and Project V2 identifiers:
 
 - `github_repo_id`, `github_repo_full_name`
 - `github_project_id`, `github_project_number`
-- Project URL, owner, visibility, closed state, description, and README
-- `github_project_payload` and `github_project_fields_payload` retain the source JSON
+- Project URL, owner, visibility, and closed state
 
 ### `tasks`
 
 Stores both Issue-level and Kanban-level state:
 
-- Issue number, numeric ID, Project Item ID, item type, title, description
+- Issue number, numeric ID, Project Item ID, title, description
 - Issue state and Project status are intentionally separate
-- Issue URL/API URL/node ID, repository and API links
-- Author, lock state, closed-by user, comment count, reactions, sub-issue/dependency summaries
-- Project custom fields: priority, size, estimate, start date, target date
-- `github_issue_payload` and `github_project_item_payload` retain the complete source snapshots
+- Author, lock state, closed-by user, comment count, reactions, and sub-issue/dependency summaries
 
 ### Child tables
 
@@ -91,6 +87,6 @@ Stores both Issue-level and Kanban-level state:
 
 Source project: [JooJeongwon/asps-1 Project 1](https://github.com/users/JooJeongwon/projects/1)
 
-The accompanying [database-data.json](./database-data.json) is a point-in-time
-snapshot of the public schema data used by this architecture document.
-
+The accompanying [database-data.json](./database-data.json) is the point-in-time
+snapshot exported before the unused-column cleanup migration; the live Supabase
+schema is authoritative.

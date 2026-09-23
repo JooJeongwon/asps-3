@@ -115,14 +115,162 @@ erDiagram
 | 테이블 | 주요 컬럼 | 핵심 설계 |
 |---|---|---|
 | `teams` | `id`, `name`, `created_at` | 프로젝트의 최상위 소유 단위 |
-| `users` | `id`, `github_user_id`, `github_username`, `display_name`, `auth_user_id`, `is_active` | GitHub 계정과 Supabase Auth 사용자를 분리해 연결 |
+| `users` | `id`, `github_user_id`, `github_username`, `auth_user_id` | GitHub 계정과 Supabase Auth 사용자를 분리해 연결 |
 | `team_members` | `team_id`, `user_id`, `role`, `joined_at` | `(team_id, user_id)` 복합 PK로 중복 가입 방지 |
 | `projects` | `id`, `team_id`, `name`, `github_repo_id`, `github_repo_full_name`, `created_at` | Team 1:N Project, GitHub 저장소 식별자 보존 |
 | `statuses` | `id`, `project_id`, `name`, `position`, `is_done` | 프로젝트별 상태 이름과 순서 관리 |
-| `milestones` | `id`, `project_id`, `github_milestone_number`, `title`, `state`, `due_on` | 프로젝트 안에서 GitHub milestone 번호를 UNIQUE 처리 |
+| `milestones` | `id`, `project_id`, `github_milestone_number`, `title`, `state` | 프로젝트 안에서 GitHub milestone 번호를 UNIQUE 처리 |
 | `tasks` | `id`, `project_id`, `status_id`, `milestone_id`, `github_issue_number`, `title`, `description`, `issue_state`, `state_reason`, `created_at`, `updated_at`, `closed_at`, `synced_at` | Issue state와 Project Status를 별도 저장 |
 | `task_assignees` | `task_id`, `user_id`, `assigned_at` | `(task_id, user_id)` 복합 PK로 같은 사람의 중복 배정 방지 |
 | `task_status_history` | `id`, `task_id`, `from_status_id`, `to_status_id`, `changed_by_user_id`, `changed_at` | Todo → In Progress → Done과 같은 이동 기록 |
+
+### 컬럼별 설명
+
+#### `teams`
+
+| 컬럼 | 설명 |
+|---|---|
+| `id` | Team의 내부 기본키다. 다른 테이블에서 Team을 참조할 때 사용한다. |
+| `name` | Team 이름이다. 공백만 있는 이름은 허용하지 않는다. |
+| `created_at` | Team이 ASPS-3 DB에 생성된 시각이다. |
+
+#### `users`
+
+| 컬럼 | 설명 |
+|---|---|
+| `id` | ASPS-3 내부 사용자 기본키다. 담당자, 팀 멤버, 상태 변경자 관계에서 사용한다. |
+| `github_user_id` | GitHub 사용자의 변경되지 않는 숫자 식별자다. GitHub 사용자 동기화와 중복 방지에 사용한다. |
+| `github_username` | GitHub 로그인 이름이다. 화면에 담당자 이름을 표시할 때 사용한다. |
+| `auth_user_id` | Supabase Auth의 `auth.users.id`와 연결되는 UUID다. 로그인 사용자와 GitHub 사용자를 연결하고 RLS 권한을 판단한다. 아직 연결되지 않은 GitHub 사용자는 NULL일 수 있다. |
+| `created_at` | 사용자가 ASPS-3 DB에 등록된 시각이다. |
+
+#### `team_members`
+
+| 컬럼 | 설명 |
+|---|---|
+| `team_id` | 소속 Team의 ID다. `teams.id`를 참조한다. |
+| `user_id` | Team에 속한 사용자의 ID다. `users.id`를 참조한다. |
+| `role` | Team 내 권한이다. 현재 `owner`, `admin`, `member`를 사용한다. |
+| `joined_at` | 사용자가 Team에 가입된 시각이다. |
+
+#### `projects`
+
+| 컬럼 | 설명 |
+|---|---|
+| `id` | ASPS-3 프로젝트의 내부 기본키다. |
+| `team_id` | 프로젝트를 소유한 Team의 ID다. `teams.id`를 참조하며 RLS의 최상위 접근 경계로 사용한다. |
+| `name` | ASPS-3에서 표시하는 프로젝트 이름이다. |
+| `github_repo_id` | 연결된 GitHub 저장소의 숫자 식별자다. 저장소 동기화와 중복 방지에 사용한다. |
+| `github_repo_full_name` | `소유자/저장소명` 형식의 GitHub 저장소 이름이다. 예: `JooJeongwon/asps-1` |
+| `created_at` | 프로젝트가 ASPS-3 DB에 생성된 시각이다. |
+| `github_project_id` | GitHub Projects V2의 Node ID다. 외부 프로젝트를 안정적으로 식별한다. |
+| `github_project_number` | GitHub Projects V2 화면에서 사용하는 프로젝트 번호다. |
+| `github_project_url` | GitHub Projects V2 프로젝트 화면 링크다. |
+| `github_project_owner_username` | GitHub Project 소유자의 사용자명이다. |
+| `github_project_owner_type` | GitHub Project 소유자 유형이다. 예: `User`, `Organization` |
+| `github_project_is_public` | GitHub Project가 공개 프로젝트인지 나타낸다. |
+| `github_project_is_closed` | GitHub Project가 닫혔는지 나타낸다. |
+
+#### `statuses`
+
+| 컬럼 | 설명 |
+|---|---|
+| `id` | 상태의 내부 기본키다. Task와 상태 이력에서 참조한다. |
+| `project_id` | 상태가 속한 프로젝트의 ID다. `projects.id`를 참조한다. |
+| `name` | 칸반 보드에 표시할 상태 이름이다. 예: `Backlog`, `In progress`, `Done` |
+| `position` | 보드에서 상태 컬럼을 표시할 순서다. 0부터 시작한다. |
+| `is_done` | 해당 상태를 칸반상 완료 상태로 취급할지 나타낸다. GitHub Issue의 `closed`와는 별도 개념이다. |
+
+#### `milestones`
+
+| 컬럼 | 설명 |
+|---|---|
+| `id` | ASPS-3 내부 마일스톤 기본키다. |
+| `project_id` | 마일스톤이 속한 프로젝트의 ID다. `projects.id`를 참조한다. |
+| `github_milestone_number` | GitHub 저장소 안에서 마일스톤을 식별하는 번호다. |
+| `title` | 마일스톤 이름이다. |
+| `state` | GitHub 마일스톤 상태다. 현재 `open` 또는 `closed`를 사용한다. |
+
+#### `tasks`
+
+| 컬럼 | 설명 |
+|---|---|
+| `id` | ASPS-3 Task의 내부 기본키다. |
+| `project_id` | Task가 속한 프로젝트의 ID다. `projects.id`를 참조한다. |
+| `status_id` | 칸반 보드에서 Task가 현재 위치한 상태의 ID다. `statuses.id`를 참조한다. |
+| `milestone_id` | Task에 연결된 마일스톤의 ID다. 없으면 NULL이다. |
+| `github_issue_number` | GitHub 저장소 안에서 Issue를 표시하는 번호다. 예: `#27` |
+| `title` | Issue 또는 Task 제목이다. |
+| `description` | Issue 본문 또는 Task 상세 설명이다. |
+| `issue_state` | GitHub Issue 자체의 상태다. 현재 `open` 또는 `closed`를 사용한다. 칸반 상태인 `status_id`와 구분한다. |
+| `state_reason` | GitHub Issue가 닫힌 이유다. 예: `completed`, `not_planned`, `reopened`, `duplicate` |
+| `created_at` | 원본 GitHub Issue가 생성된 시각이다. |
+| `updated_at` | 원본 GitHub Issue가 마지막으로 수정된 시각이다. |
+| `closed_at` | 원본 GitHub Issue가 닫힌 시각이다. 열려 있으면 NULL이다. |
+| `synced_at` | 해당 Task의 GitHub 원본을 ASPS-3에 마지막으로 동기화한 시각이다. |
+| `github_issue_id` | GitHub Issue의 안정적인 숫자 식별자다. Issue 번호가 바뀌거나 저장소가 여러 개일 때도 원본을 식별한다. |
+| `github_project_item_id` | GitHub Projects V2에서 해당 Issue를 가리키는 Project Item 식별자다. |
+| `github_author_id` | Issue 작성자의 GitHub 사용자 숫자 ID다. |
+| `github_author_username` | Issue 작성자의 GitHub 사용자명이다. |
+| `github_author_association` | 작성자와 저장소의 관계다. 예: `OWNER`, `MEMBER`, `CONTRIBUTOR` |
+| `github_closed_by_id` | Issue를 닫은 GitHub 사용자의 숫자 ID다. 알 수 없으면 NULL이다. |
+| `github_closed_by_username` | Issue를 닫은 GitHub 사용자명이다. 알 수 없으면 NULL이다. |
+| `github_comments_count` | GitHub 원본 Issue의 댓글 수 스냅샷이다. 상세 댓글은 `task_comments`에서 관리한다. |
+| `github_reactions` | Issue에 달린 GitHub Reaction 집계 원본이다. JSONB로 저장한다. |
+
+#### `task_assignees`
+
+| 컬럼 | 설명 |
+|---|---|
+| `task_id` | 담당자가 배정된 Task의 ID다. `tasks.id`를 참조한다. |
+| `user_id` | Task에 배정된 사용자의 ID다. `users.id`를 참조한다. |
+| `assigned_at` | 사용자가 Task에 배정된 시각이다. |
+
+#### `task_status_history`
+
+| 컬럼 | 설명 |
+|---|---|
+| `id` | 상태 변경 기록의 기본키다. |
+| `task_id` | 상태가 변경된 Task의 ID다. `tasks.id`를 참조한다. |
+| `from_status_id` | 변경 전 상태의 ID다. 최초 등록처럼 이전 상태가 없으면 NULL이다. |
+| `to_status_id` | 변경 후 상태의 ID다. `statuses.id`를 참조한다. |
+| `changed_by_user_id` | 변경을 수행한 ASPS-3 사용자의 ID다. 외부 동기화 등 변경자를 알 수 없으면 NULL이다. |
+| `changed_at` | 상태가 변경된 시각이다. |
+
+#### `task_comments`
+
+| 컬럼 | 설명 |
+|---|---|
+| `id` | 댓글의 ASPS-3 내부 기본키다. |
+| `task_id` | 댓글이 달린 Task의 ID다. `tasks.id`를 참조한다. |
+| `github_comment_id` | GitHub 댓글의 숫자 식별자다. |
+| `github_comment_node_id` | GitHub 댓글의 Node ID다. |
+| `github_comment_url` | GitHub 댓글 화면 또는 API 링크다. |
+| `github_author_id` | 댓글 작성자의 GitHub 사용자 숫자 ID다. |
+| `github_author_username` | 댓글 작성자의 GitHub 사용자명이다. |
+| `body` | 댓글 본문이다. |
+| `comment_created_at` | GitHub에서 댓글이 작성된 시각이다. |
+| `comment_updated_at` | GitHub에서 댓글이 마지막 수정된 시각이다. |
+| `github_reactions` | 댓글에 달린 GitHub Reaction 집계 원본이다. |
+| `github_payload` | 동기화 당시 GitHub 댓글 원본 JSON이다. |
+| `created_at` | 댓글이 ASPS-3 DB에 저장된 시각이다. |
+
+#### `task_timeline_events`
+
+| 컬럼 | 설명 |
+|---|---|
+| `id` | 타임라인 이벤트의 ASPS-3 내부 기본키다. |
+| `task_id` | 이벤트가 발생한 Task의 ID다. `tasks.id`를 참조한다. |
+| `github_event_key` | Task 안에서 이벤트를 중복 적재하지 않기 위한 식별 키다. |
+| `github_event_id` | GitHub 이벤트의 숫자 식별자다. |
+| `github_event_node_id` | GitHub 이벤트의 Node ID다. |
+| `github_event_url` | GitHub 이벤트의 원본 링크다. |
+| `event_type` | 이벤트 종류다. 예: `project_v2_item_status_changed`, `assigned`, `closed` |
+| `github_actor_id` | 이벤트를 발생시킨 GitHub 사용자의 숫자 ID다. |
+| `github_actor_username` | 이벤트를 발생시킨 GitHub 사용자명이다. |
+| `occurred_at` | GitHub에서 실제 이벤트가 발생한 시각이다. |
+| `github_payload` | 이벤트의 상세 원본 JSON이다. 상태 변경 전후 값처럼 정규화하지 않은 GitHub 데이터를 보존한다. |
+| `created_at` | 이벤트가 ASPS-3 DB에 저장된 시각이다. |
 
 ### 주요 관계
 
@@ -164,7 +312,6 @@ erDiagram
 - Team 또는 Project와 생명주기를 완전히 공유하는 하위 데이터는 `ON DELETE CASCADE`를 사용한다.
 - Task 삭제 시 담당 관계와 상태 이력은 함께 삭제한다.
 - 과거 변경자 정보는 보존 가치가 있으므로 `changed_by_user_id`는 사용자 삭제 시 `SET NULL`을 고려한다.
-- 실제 운영에서는 User를 물리 삭제하기보다 `is_active = false`로 비활성화하는 방식을 우선한다.
 
 ## 8. 상태 이력 사용 원칙
 
