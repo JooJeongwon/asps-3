@@ -1,0 +1,7 @@
+{
+  "name": "cones-kanban",
+  "private": true,
+  "scripts": {
+    "dev": "python3 -m http.server 4173"
+  }
+}

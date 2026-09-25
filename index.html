@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0d1117">
+    <title>CONES · Projects</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./config.js" defer></script>
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <header class="global-header">
+      <div class="header-inner">
+        <a class="brand" href="./" aria-label="Projects home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 16 16"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0Zm0 1.5a6.5 6.5 0 1 1 0 13A6.5 6.5 0 0 1 8 1.5ZM4.5 6.25a.75.75 0 0 0 0 1.5h.75v2.5h-.75a.75.75 0 0 0 0 1.5h2.25v-1.5H6.75v-2.5h1.5v-1.5H4.5Zm5 0v1.5H11v2.5h-.75v1.5h2.25a.75.75 0 0 0 0-1.5h-.75v-2.5h.75a.75.75 0 0 0 0-1.5H9.5Z"/></svg>
+          </span>
+          <span>Projects</span>
+        </a>
+        <span class="header-divider" aria-hidden="true"></span>
+        <span id="header-repository" class="header-repository">seune-h0203 / cones</span>
+        <div class="header-actions">
+          <button class="header-icon" type="button" data-action="focus-search" aria-label="Search">
+            <svg viewBox="0 0 16 16"><path d="m11.3 10.3 3.2 3.2-1 1-3.2-3.2a5 5 0 1 1 1-1ZM6.5 10A3.5 3.5 0 1 0 6.5 3 3.5 3.5 0 0 0 6.5 10Z"/></svg>
+          </button>
+          <a id="header-owner" class="header-avatar" href="https://github.com/seune-h0203" target="_blank" rel="noreferrer" aria-label="Open GitHub profile">S</a>
+        </div>
+      </div>
+    </header>
+    <main class="page">
+      <section class="project-header">
+        <div class="breadcrumbs">
+          <span class="repo-icon" aria-hidden="true">
+            <svg viewBox="0 0 16 16"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0Zm0 1.5a6.5 6.5 0 1 1 0 13A6.5 6.5 0 0 1 8 1.5ZM4.5 6.25a.75.75 0 0 0 0 1.5h.75v2.5h-.75a.75.75 0 0 0 0 1.5h2.25v-1.5H6.75v-2.5h1.5v-1.5H4.5Zm5 0v1.5H11v2.5h-.75v1.5h2.25a.75.75 0 0 0 0-1.5h-.75v-2.5h.75a.75.75 0 0 0 0-1.5H9.5Z"/></svg>
+          </span>
+          <a id="repository-link" href="#" target="_blank" rel="noreferrer">seune-h0203/cones</a>
+          <span class="slash">/</span>
+          <span>Projects</span>
+        </div>
+        <div class="title-line">
+          <h1 id="project-title">CONES</h1>
+          <span class="public-pill"><span></span> Public</span>
+          <a id="project-link" class="external-link" href="#" target="_blank" rel="noreferrer">Open in GitHub <span>↗</span></a>
+        </div>
+        <p id="project-description">GitHub Projects 데이터를 기반으로 구성한 CONES 작업 보드</p>
+      </section>
+      <nav class="view-tabs" aria-label="Project views">
+        <button class="view-tab active" type="button" data-view="board">
+          <svg viewBox="0 0 16 16"><path d="M1.75 2h3.5c.41 0 .75.34.75.75v10.5c0 .41-.34.75-.75.75h-3.5A.75.75 0 0 1 1 13.25V2.75c0-.41.34-.75.75-.75Zm5.5 0h3.5c.41 0 .75.56.75 1.25v6.5c0 .69-.34.75-.75.75h-3.5a.75.75 0 0 1-.75-.75v-6.5c0-.41.34-.75.75-.75Zm5.5 0h1.5c.41 0 .75.56.75 1.25v3.5c0 .41-.34.75-.75.75h-1.5a.75.75 0 0 1-.75-.75v-3.5c0-.69.34-.75.75-.75Z"/></svg>
+          Board
+        </button>
+        <button class="view-tab" type="button" data-view="table">
+          <svg viewBox="0 0 16 16"><path d="M1.75 1h12.5c.69 0 1.25.56 1.25 1.25v11.5c0 .69-.56 1.25-1.25 1.25H1.75C1.06 15 .5 14.44.5 13.75V2.25C.5 1.56 1.06 1 1.75 1ZM2 4.5v8.75h3.25V4.5H2Zm4.75 0v8.75H9V4.5H6.75Zm3.75 0v8.75H14V4.5h-3.5ZM2 2.5V3h12v-.5H2Z"/></svg>
+          Table
+        </button>
+        <button class="view-tab" type="button" data-view="roadmap">
+          <svg viewBox="0 0 16 16"><path d="M1 3.25C1 2.56 1.56 2 2.25 2h11.5c.69 0 1.25.56 1.25 1.25v9.5c0 .69-.56 1.25-1.25 1.25H2.25C1.56 14 1 13.44 1 12.75v-9.5Zm1.5.25v9h11V3.5h-11ZM3.75 5h1.5v2h-1.5V5Zm2.5 0h5.75v1.5H6.25V5Zm-2.5 3h1.5v2h-1.5V8Zm2.5 0h5.75v1.5H6.25V8Z"/></svg>
+          Roadmap
+        </button>
+        <button class="view-tab view-add" type="button" data-action="add-view" aria-label="Add view">+</button>
+      </nav>
+      <section class="toolbar" aria-label="Board controls">
+        <div class="toolbar-left">
+          <button class="control-button" type="button" data-action="toggle-filter" aria-expanded="false">
+            <svg viewBox="0 0 16 16"><path d="M1.75 2h12.5a.75.75 0 0 1 .58 1.23L10 8.86v3.39a.75.75 0 0 1-.42.67l-2 1A.75.75 0 0 1 6.5 13.25V8.86L1.17 3.23A.75.75 0 0 1 1.75 2ZM3.5 3.5 8 8.25v3.8l.5.25V8.25l4.5-4.75h-9.5Z"/></svg>
+            Filter <span id="filter-count" class="filter-count" hidden>0</span>
+          </button>
+          <button class="control-button" type="button" data-action="sort">
+            <svg viewBox="0 0 16 16"><path d="M4.75 1.5h1.5v10.44l2.03-2.03 1.06 1.06-3.84 3.84-3.84-3.84 1.06-1.06 2.03 2.03V1.5Zm6.5 13h-1.5V4.06L7.72 6.1 6.66 5.03l3.84-3.84 3.84 3.84-1.06 1.06-2.03-2.03V14.5Z"/></svg>
+            Sort
+          </button>
+          <span id="active-filter" class="active-filter" hidden></span>
+        </div>
+        <div class="toolbar-right">
+          <div class="search-box">
+            <svg viewBox="0 0 16 16"><path d="m11.3 10.3 3.2 3.2-1 1-3.2-3.2a5 5 0 1 1 1-1ZM6.5 10A3.5 3.5 0 1 0 6.5 3 3.5 3.5 0 0 0 6.5 10Z"/></svg>
+            <input id="search-input" type="search" placeholder="Search items" autocomplete="off">
+            <kbd>/</kbd>
+          </div>
+          <button class="control-button icon-only" type="button" data-action="more" aria-label="More options">···</button>
+        </div>
+      </section>
+      <div id="filter-popover" class="popover" hidden>
+        <div class="popover-header"><strong>Filter items</strong><button type="button" data-action="close-filter" aria-label="Close">×</button></div>
+        <label for="assignee-filter">Assignee</label>
+        <select id="assignee-filter"><option value="all">Everyone</option></select>
+        <label for="state-filter">Issue state</label>
+        <select id="state-filter"><option value="all">Open and closed</option><option value="open">Open</option><option value="closed">Closed</option></select>
+        <button class="clear-filter" type="button" data-action="clear-filter">Clear filters</button>
+      </div>
+      <div id="board-status" class="board-status">Loading board…</div>
+      <section id="board" class="board" aria-label="CONES Kanban board"></section>
+    </main>
+    <div id="modal-root"></div>
+    <div id="toast-region" class="toast-region" aria-live="polite"></div>
+  </body>
+</html>

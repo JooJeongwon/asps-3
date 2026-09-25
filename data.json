@@ -1,0 +1,369 @@
+{
+  "projects": [
+    {
+      "project_id": 1,
+      "project_name": "CONES",
+      "github_repo_full_name": "seune-h0203/cones",
+      "github_project_number": 3,
+      "github_project_url": "https://github.com/users/seune-h0203/projects/3"
+    }
+  ],
+  "statuses": [
+    {
+      "status_id": 1,
+      "project_id": 1,
+      "status_name": "Todo",
+      "position": 0,
+      "is_done": false
+    },
+    {
+      "status_id": 2,
+      "project_id": 1,
+      "status_name": "In Progress",
+      "position": 1,
+      "is_done": false
+    },
+    {
+      "status_id": 3,
+      "project_id": 1,
+      "status_name": "Done",
+      "position": 2,
+      "is_done": true
+    }
+  ],
+  "users": [
+    {
+      "user_id": 1,
+      "github_username": "Hamchaelim",
+      "display_name": "Hamchaelim"
+    },
+    {
+      "user_id": 2,
+      "github_username": "ohoobae",
+      "display_name": "ohoobae"
+    },
+    {
+      "user_id": 3,
+      "github_username": "qkrtpfls03",
+      "display_name": "qkrtpfls03"
+    },
+    {
+      "user_id": 4,
+      "github_username": "seune-h0203",
+      "display_name": "seune-h0203"
+    }
+  ],
+  "milestones": [
+    {
+      "milestone_id": 1,
+      "project_id": 1,
+      "github_milestone_number": 1,
+      "title": "CONES — FINAL SUBMISSION",
+      "state": "open"
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": 1,
+      "project_id": 1,
+      "status_id": 2,
+      "milestone_id": 1,
+      "github_issue_number": 9,
+      "issue_url": "https://github.com/seune-h0203/cones/issues/9",
+      "title": "[QA] Animation 및 Interaction 최종 테스트",
+      "issue_state": "open"
+    },
+    {
+      "task_id": 2,
+      "project_id": 1,
+      "status_id": 2,
+      "milestone_id": 1,
+      "github_issue_number": 13,
+      "issue_url": "https://github.com/seune-h0203/cones/issues/13",
+      "title": "[PRESENTATION] 3분 발표 및 Demo 준비",
+      "issue_state": "open"
+    },
+    {
+      "task_id": 3,
+      "project_id": 1,
+      "status_id": 2,
+      "milestone_id": null,
+      "github_issue_number": 39,
+      "issue_url": "https://github.com/seune-h0203/cones/issues/39",
+      "title": "[PRESENTATION] 발표 대본 준비",
+      "issue_state": "open"
+    },
+    {
+      "task_id": 5,
+      "project_id": 1,
+      "status_id": 3,
+      "milestone_id": 1,
+      "github_issue_number": 1,
+      "issue_url": "https://github.com/seune-h0203/cones/issues/1",
+      "title": "[PLAN] CONES 프로젝트 최종 작업 관리",
+      "issue_state": "closed"
+    },
+    {
+      "task_id": 6,
+      "project_id": 1,
+      "status_id": 3,
+      "milestone_id": 1,
+      "github_issue_number": 2,
+      "issue_url": "https://github.com/seune-h0203/cones/issues/2",
+      "title": "[CONTENT] 아티스트 정보 최종 검수",
+      "issue_state": "closed"
+    },
+    {
+      "task_id": 4,
+      "project_id": 1,
+      "status_id": 3,
+      "milestone_id": 1,
+      "github_issue_number": 3,
+      "issue_url": "https://github.com/seune-h0203/cones/issues/3",
+      "title": "[FE] 전체 페이지 콘텐츠 연결 검수",
+      "issue_state": "closed"
+    },
+    {
+      "task_id": 7,
+      "project_id": 1,
+      "status_id": 3,
+      "milestone_id": 1,
+      "github_issue_number": 4,
+      "issue_url": "https://github.com/seune-h0203/cones/issues/4",
+      "title": "[FE] 이미지 및 Asset 경로 최종 검수",
+      "issue_state": "closed"
+    },
+    {
+      "task_id": 8,
+      "project_id": 1,
+      "status_id": 3,
+      "milestone_id": 1,
+      "github_issue_number": 5,
+      "issue_url": "https://github.com/seune-h0203/cones/issues/5",
+      "title": "[FE] Teaser Video Manifest 최종 검수",
+      "issue_state": "closed"
+    },
+    {
+      "task_id": 9,
+      "project_id": 1,
+      "status_id": 3,
+      "milestone_id": 1,
+      "github_issue_number": 6,
+      "issue_url": "https://github.com/seune-h0203/cones/issues/6",
+      "title": "[FE] GitHub Pages Routing 최종 검수",
+      "issue_state": "closed"
+    },
+    {
+      "task_id": 10,
+      "project_id": 1,
+      "status_id": 3,
+      "milestone_id": 1,
+      "github_issue_number": 7,
+      "issue_url": "https://github.com/seune-h0203/cones/issues/7",
+      "title": "[QA] Desktop 반응형 테스트",
+      "issue_state": "closed"
+    },
+    {
+      "task_id": 11,
+      "project_id": 1,
+      "status_id": 3,
+      "milestone_id": 1,
+      "github_issue_number": 10,
+      "issue_url": "https://github.com/seune-h0203/cones/issues/10",
+      "title": "[QA] Accessibility 최종 검수",
+      "issue_state": "closed"
+    },
+    {
+      "task_id": 12,
+      "project_id": 1,
+      "status_id": 3,
+      "milestone_id": 1,
+      "github_issue_number": 11,
+      "issue_url": "https://github.com/seune-h0203/cones/issues/11",
+      "title": "[QA] Production Build 테스트",
+      "issue_state": "closed"
+    },
+    {
+      "task_id": 13,
+      "project_id": 1,
+      "status_id": 3,
+      "milestone_id": 1,
+      "github_issue_number": 12,
+      "issue_url": "https://github.com/seune-h0203/cones/issues/12",
+      "title": "[DEPLOY] GitHub Pages 최종 배포 확인",
+      "issue_state": "closed"
+    },
+    {
+      "task_id": 14,
+      "project_id": 1,
+      "status_id": 3,
+      "milestone_id": null,
+      "github_issue_number": 32,
+      "issue_url": "https://github.com/seune-h0203/cones/issues/32",
+      "title": "[BE] Supabase 커머스 백엔드(스키마·RLS·RPC) 구축",
+      "issue_state": "closed"
+    },
+    {
+      "task_id": 15,
+      "project_id": 1,
+      "status_id": 3,
+      "milestone_id": null,
+      "github_issue_number": 33,
+      "issue_url": "https://github.com/seune-h0203/cones/issues/33",
+      "title": "[FE] Shop/Cart/Checkout/Order 커머스 프론트엔드 구현",
+      "issue_state": "closed"
+    },
+    {
+      "task_id": 16,
+      "project_id": 1,
+      "status_id": 3,
+      "milestone_id": null,
+      "github_issue_number": 34,
+      "issue_url": "https://github.com/seune-h0203/cones/issues/34",
+      "title": "[DB] order_items 이미지 컬럼 추가 및 주문 데이터 마이그레이션",
+      "issue_state": "closed"
+    },
+    {
+      "task_id": 17,
+      "project_id": 1,
+      "status_id": 3,
+      "milestone_id": null,
+      "github_issue_number": 35,
+      "issue_url": "https://github.com/seune-h0203/cones/issues/35",
+      "title": "[FIX] 라우팅 서브패스 및 이미지 경로 버그 수정",
+      "issue_state": "closed"
+    },
+    {
+      "task_id": 18,
+      "project_id": 1,
+      "status_id": 3,
+      "milestone_id": null,
+      "github_issue_number": 36,
+      "issue_url": "https://github.com/seune-h0203/cones/issues/36",
+      "title": "[DEVOPS] GitHub Actions 배포 워크플로 Supabase 환경변수 연동",
+      "issue_state": "closed"
+    },
+    {
+      "task_id": 19,
+      "project_id": 1,
+      "status_id": 3,
+      "milestone_id": null,
+      "github_issue_number": 37,
+      "issue_url": "https://github.com/seune-h0203/cones/issues/37",
+      "title": "[DOCS] README 구조 개편 및 멤버 데이터 정합성 수정",
+      "issue_state": "closed"
+    }
+  ],
+  "task_assignees": [
+    {
+      "task_id": 1,
+      "user_id": 1
+    },
+    {
+      "task_id": 2,
+      "user_id": 4
+    },
+    {
+      "task_id": 3,
+      "user_id": 2
+    },
+    {
+      "task_id": 4,
+      "user_id": 3
+    },
+    {
+      "task_id": 4,
+      "user_id": 4
+    },
+    {
+      "task_id": 5,
+      "user_id": 3
+    },
+    {
+      "task_id": 5,
+      "user_id": 4
+    },
+    {
+      "task_id": 6,
+      "user_id": 2
+    },
+    {
+      "task_id": 6,
+      "user_id": 3
+    },
+    {
+      "task_id": 7,
+      "user_id": 1
+    },
+    {
+      "task_id": 7,
+      "user_id": 2
+    },
+    {
+      "task_id": 8,
+      "user_id": 2
+    },
+    {
+      "task_id": 9,
+      "user_id": 3
+    },
+    {
+      "task_id": 9,
+      "user_id": 4
+    },
+    {
+      "task_id": 10,
+      "user_id": 1
+    },
+    {
+      "task_id": 11,
+      "user_id": 1
+    },
+    {
+      "task_id": 12,
+      "user_id": 1
+    },
+    {
+      "task_id": 13,
+      "user_id": 1
+    },
+    {
+      "task_id": 14,
+      "user_id": 2
+    },
+    {
+      "task_id": 14,
+      "user_id": 4
+    },
+    {
+      "task_id": 15,
+      "user_id": 3
+    },
+    {
+      "task_id": 15,
+      "user_id": 4
+    },
+    {
+      "task_id": 16,
+      "user_id": 4
+    },
+    {
+      "task_id": 17,
+      "user_id": 4
+    },
+    {
+      "task_id": 18,
+      "user_id": 4
+    },
+    {
+      "task_id": 19,
+      "user_id": 4
+    }
+  ],
+  "meta": {
+    "projectId": "ismhrkrkbvlbsxmwhvzb",
+    "projectUrl": "https://ismhrkrkbvlbsxmwhvzb.supabase.co",
+    "exportedAt": "2026-09-25T15:02:52.567Z",
+    "note": "Read-only fallback snapshot exported from the connected Supabase project."
+  }
+}
