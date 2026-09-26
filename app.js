@@ -1,5 +1,5 @@
 const CONFIG = window.KANBAN_CONFIG || {};
-const state = { project: null, statuses: [], users: [], milestones: [], tasks: [], query: "", assignee: "all", issueState: "all", sort: "issue", live: false, draggingId: null };
+const state = { project: null, statuses: [], users: [], milestones: [], tasks: [], issueDetails: [], issueComments: [], issueTimelineEvents: [], projectStatusHistory: [], timelineCollectionRequests: [], query: "", assignee: "all", issueState: "all", sort: "issue", live: false, draggingId: null };
 const $ = function (selector) { return document.querySelector(selector); };
 const board = $("#board");
 const searchInput = $("#search-input");
@@ -24,6 +24,10 @@ function avatar(user) {
 }
 function projectRepo() { return state.project && state.project.github_repo_full_name || "seune-h0203/cones"; }
 function issueUrl(task) { return task.issue_url || "https://github.com/" + projectRepo() + "/issues/" + task.github_issue_number; }
+function formatDate(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "" : date.toLocaleString("ko-KR", { dateStyle: "medium", timeStyle: "short" });
+}
 
 function unwrap(raw) {
   const usersById = new Map((raw.users || []).map(function (user) { return [user.user_id, user]; }));
@@ -37,7 +41,12 @@ function unwrap(raw) {
     statuses: (raw.statuses || []).sort(function (a, b) { return a.position - b.position; }),
     users: raw.users || [],
     milestones: raw.milestones || [],
-    tasks: (raw.tasks || []).map(function (task) { return Object.assign({}, task, { assignees: assigneesByTask.get(task.task_id) || [] }); })
+    tasks: (raw.tasks || []).map(function (task) { return Object.assign({}, task, { assignees: assigneesByTask.get(task.task_id) || [] }); }),
+    issueDetails: raw.issue_details || [],
+    issueComments: raw.issue_comments || [],
+    issueTimelineEvents: raw.issue_timeline_events || [],
+    projectStatusHistory: raw.project_status_history || [],
+    timelineCollectionRequests: raw.timeline_collection_requests || []
   };
 }
 async function fetchSnapshot() {
@@ -60,12 +69,17 @@ async function fetchLive() {
     get("users", "select=*&order=user_id"),
     get("milestones", "select=*&order=milestone_id"),
     get("tasks", "select=*&order=status_id.asc,github_issue_number.asc"),
-    get("task_assignees", "select=*&order=task_id,user_id")
+    get("task_assignees", "select=*&order=task_id,user_id"),
+    get("issue_details", "select=*&order=task_id"),
+    get("issue_comments", "select=*&order=task_id,created_at"),
+    get("issue_timeline_events", "select=*&order=task_id,occurred_at"),
+    get("project_status_history", "select=*&order=task_id,occurred_at"),
+    get("timeline_collection_requests", "select=*&order=requested_issue_number")
   ]);
-  return unwrap({ projects: results[0], statuses: results[1], users: results[2], milestones: results[3], tasks: results[4], task_assignees: results[5] });
+  return unwrap({ projects: results[0], statuses: results[1], users: results[2], milestones: results[3], tasks: results[4], task_assignees: results[5], issue_details: results[6], issue_comments: results[7], issue_timeline_events: results[8], project_status_history: results[9], timeline_collection_requests: results[10] });
 }
 function applyData(data, live) {
-  state.project = data.project; state.statuses = data.statuses; state.users = data.users; state.milestones = data.milestones; state.tasks = data.tasks; state.live = live;
+  state.project = data.project; state.statuses = data.statuses; state.users = data.users; state.milestones = data.milestones; state.tasks = data.tasks; state.issueDetails = data.issueDetails; state.issueComments = data.issueComments; state.issueTimelineEvents = data.issueTimelineEvents; state.projectStatusHistory = data.projectStatusHistory; state.timelineCollectionRequests = data.timelineCollectionRequests; state.live = live;
   renderProject(); renderAssigneeOptions(); render();
 }
 function renderProject() {
@@ -123,14 +137,32 @@ function showToast(message) {
   const toast = document.createElement("div"); toast.className = "toast"; toast.textContent = message; $("#toast-region").append(toast);
   setTimeout(function () { toast.remove(); }, 3200);
 }
+function renderActivity(taskId) {
+  const comments = state.issueComments.filter(function (item) { return String(item.task_id) === String(taskId); }).map(function (comment) {
+    return { date: comment.created_at, html: '<article class="activity-item"><div class="activity-meta"><strong>' + escapeHtml(comment.author_login || "Unknown user") + '</strong><time datetime="' + escapeHtml(comment.created_at || "") + '">' + escapeHtml(formatDate(comment.created_at)) + '</time></div><p class="activity-body">' + escapeHtml(comment.body || "") + '</p></article>' };
+  });
+  const timeline = state.issueTimelineEvents.filter(function (item) { return String(item.task_id) === String(taskId); }).map(function (event) {
+    return { date: event.occurred_at, html: '<article class="activity-item timeline-item"><div class="activity-meta"><strong>' + escapeHtml(event.actor_login || "GitHub") + '</strong><time datetime="' + escapeHtml(event.occurred_at || "") + '">' + escapeHtml(formatDate(event.occurred_at)) + '</time></div><p class="activity-body">' + escapeHtml(event.note || event.event_type || "Issue activity") + '</p></article>' };
+  });
+  const statusHistory = state.projectStatusHistory.filter(function (item) { return String(item.task_id) === String(taskId); }).map(function (event) {
+    const from = state.statuses.find(function (status) { return String(status.status_id) === String(event.from_status_id); });
+    const to = state.statuses.find(function (status) { return String(status.status_id) === String(event.to_status_id); });
+    return { date: event.occurred_at, html: '<article class="activity-item timeline-item"><div class="activity-meta"><strong>' + escapeHtml(event.actor_login || "Project") + '</strong><time datetime="' + escapeHtml(event.occurred_at || "") + '">' + escapeHtml(formatDate(event.occurred_at)) + '</time></div><p class="activity-body">Moved from ' + escapeHtml(from ? from.status_name : "unknown") + ' to ' + escapeHtml(to ? to.status_name : "unknown") + '</p></article>' };
+  });
+  const items = comments.concat(timeline, statusHistory).sort(function (a, b) { return new Date(b.date || 0) - new Date(a.date || 0); });
+  if (items.length) return '<div class="activity-list">' + items.map(function (item) { return item.html; }).join("") + '</div>';
+  const request = state.timelineCollectionRequests.find(function (item) { return String(item.requested_task_id) === String(taskId); });
+  return request && request.failure_reason ? '<p class="empty-detail">Timeline history unavailable: ' + escapeHtml(request.failure_reason) + '</p>' : '<p class="empty-detail">No activity recorded for this issue.</p>';
+}
 function openTask(taskId) {
   const task = state.tasks.find(function (item) { return String(item.task_id) === String(taskId); });
   if (!task) return;
   const status = state.statuses.find(function (item) { return item.status_id === task.status_id; });
   const milestone = state.milestones.find(function (item) { return item.milestone_id === task.milestone_id; });
+  const details = state.issueDetails.find(function (item) { return String(item.task_id) === String(task.task_id); });
   const names = task.assignees.length ? task.assignees.map(function (user) { return escapeHtml(user.github_username); }).join(", ") : "Unassigned";
   const issueLabel = task.issue_state === "closed" ? "Closed" : "Open";
-  $("#modal-root").innerHTML = '<div class="modal-backdrop" data-action="close-modal"><article class="modal issue-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-header"><div><p class="modal-kicker">Issue #' + task.github_issue_number + " · " + escapeHtml(projectRepo()) + '</p><h2 id="modal-title">' + escapeHtml(task.title) + '</h2><p class="issue-status"><span class="issue-state ' + (task.issue_state === "closed" ? "closed" : "") + '"></span>' + issueLabel + '</p></div><button type="button" class="modal-close" data-action="close-modal" aria-label="Close">×</button></div><div class="issue-section"><h3>Description</h3><p class="empty-detail">Issue description is not stored in the connected Supabase database.</p></div><div class="issue-section"><h3>Activity</h3><p class="empty-detail">Comments and timeline history are not stored in the connected Supabase database.</p></div><dl class="modal-details"><div class="detail-row"><dt>Project status</dt><dd>' + escapeHtml(status ? status.status_name : "Unknown") + '</dd></div><div class="detail-row"><dt>Assignees</dt><dd>' + names + '</dd></div><div class="detail-row"><dt>Milestone</dt><dd>' + escapeHtml(milestone ? milestone.title : "None") + '</dd></div></dl><div class="modal-actions"><a class="control-button" href="' + escapeHtml(issueUrl(task)) + '" target="_blank" rel="noreferrer">Open in GitHub ↗</a></div></article></div>';
+  $("#modal-root").innerHTML = '<div class="modal-backdrop"><article class="modal issue-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-header"><div><p class="modal-kicker">Issue #' + task.github_issue_number + " · " + escapeHtml(projectRepo()) + '</p><h2 id="modal-title">' + escapeHtml(task.title) + '</h2><p class="issue-status"><span class="issue-state ' + (task.issue_state === "closed" ? "closed" : "") + '"></span>' + issueLabel + '</p></div><button type="button" class="modal-close" data-action="close-modal" aria-label="Close">×</button></div><div class="issue-section"><h3>Description</h3><p class="issue-body">' + escapeHtml(details && details.body || "No description available for this issue.") + '</p></div><div class="issue-section"><h3>Activity</h3>' + renderActivity(task.task_id) + '</div><dl class="modal-details"><div class="detail-row"><dt>Project status</dt><dd>' + escapeHtml(status ? status.status_name : "Unknown") + '</dd></div><div class="detail-row"><dt>Assignees</dt><dd>' + names + '</dd></div><div class="detail-row"><dt>Milestone</dt><dd>' + escapeHtml(milestone ? milestone.title : "None") + '</dd></div></dl><div class="modal-actions"><a class="control-button" href="' + escapeHtml(issueUrl(task)) + '" target="_blank" rel="noreferrer">Open in GitHub ↗</a></div></article></div>';
 }
 function closeModal() { $("#modal-root").innerHTML = ""; }
 async function persistStatus(task, previousStatusId) {

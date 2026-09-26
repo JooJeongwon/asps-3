@@ -99,15 +99,24 @@ h1 { margin: 0; font-size: clamp(26px, 3vw, 34px); line-height: 1.2; letter-spac
 .add-item span { font-size: 16px; }
 .toast-region { position: fixed; right: 24px; bottom: 24px; z-index: 30; display: grid; gap: 8px; }
 .toast { max-width: min(360px, calc(100vw - 48px)); padding: 10px 14px; color: white; background: #25292e; border: 1px solid #444c56; border-radius: 6px; box-shadow: 0 8px 24px rgba(31,35,40,.2); font-size: 13px; }
-.modal-backdrop { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 20px; background: rgba(31,35,40,.45); }
-.modal { width: min(620px, 100%); max-height: min(720px, calc(100vh - 40px)); overflow: auto; padding: 26px; background: white; border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 16px 48px rgba(31,35,40,.24); }
+.modal-backdrop { position: fixed; inset: 0; z-index: 20; display: flex; justify-content: flex-end; overflow-y: auto; background: rgba(31,35,40,.45); scrollbar-width: none; }
+.modal-backdrop::-webkit-scrollbar { display: none; }
+.modal { align-self: flex-start; width: min(520px, 100%); min-width: 0; min-height: 100%; height: max-content; overflow: visible; padding: 28px; background: white; border-left: 1px solid var(--border); box-shadow: -12px 0 36px rgba(31,35,40,.18); }
 .modal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
 .modal h2 { margin: 0; font-size: 22px; line-height: 1.3; }
 .modal-kicker { margin: 0 0 8px; color: var(--subtle); font-size: 13px; }
 .issue-status { display: flex; align-items: center; gap: 6px; margin: 10px 0 0; color: var(--muted); font-size: 13px; }
 .issue-section { margin-top: 24px; }
 .issue-section h3 { margin: 0 0 9px; font-size: 14px; }
+.issue-body { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; word-break: break-word; }
 .empty-detail { margin: 0; padding: 13px; color: var(--muted); background: var(--canvas); border-radius: 6px; font-size: 13px; }
+.activity-list { display: grid; gap: 12px; }
+.activity-item { max-width: 100%; min-width: 0; margin: 0; padding: 13px; overflow: hidden; background: var(--canvas); border: 1px solid #e6e9ed; border-radius: 6px; }
+.activity-meta { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; min-width: 0; font-size: 12px; }
+.activity-meta strong { min-width: 0; overflow-wrap: anywhere; }
+.activity-meta time { color: var(--subtle); white-space: nowrap; }
+.activity-body { max-width: 100%; margin: 8px 0 0; overflow-wrap: anywhere; white-space: pre-wrap; word-break: break-word; }
+.timeline-item { background: white; border-style: dashed; }
 .modal-close { width: 30px; height: 30px; padding: 0; color: var(--subtle); background: transparent; border: 0; border-radius: 6px; font-size: 24px; }
 .modal-close:hover { background: var(--canvas); }
 .modal-details { display: grid; gap: 12px; margin: 24px 0 0; }
