@@ -28,6 +28,56 @@ function formatDate(value) {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? "" : date.toLocaleString("ko-KR", { dateStyle: "medium", timeStyle: "short" });
 }
+// ponytail: GitHub Markdown subset; use a pinned parser if full CommonMark parity is required.
+function markdownInline(value) {
+  const tokens = [];
+  const save = function (html) { const key = "\u0000" + tokens.length + "\u0000"; tokens.push(html); return key; };
+  let html = escapeHtml(value);
+  html = html.replace(/`([^`\n]+)`/g, function (_, code) { return save("<code>" + code + "</code>"); });
+  html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, function (_, label, url) { return save('<a href="' + url + '" target="_blank" rel="noreferrer">' + label + "</a>"); });
+  html = html.replace(/\*\*([^*\n]+)\*\*|__([^_\n]+)__/g, function (_, strong, alternate) { return "<strong>" + (strong || alternate) + "</strong>"; });
+  html = html.replace(/~~([^~\n]+)~~/g, "<del>$1</del>");
+  html = html.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, "$1<em>$2</em>");
+  return html.replace(/\u0000(\d+)\u0000/g, function (_, index) { return tokens[Number(index)]; });
+}
+function renderMarkdown(value) {
+  const lines = String(value == null ? "" : value).replace(/\r\n?/g, "\n").split("\n");
+  const output = [], paragraph = [];
+  const flushParagraph = function () { if (paragraph.length) output.push("<p>" + paragraph.map(markdownInline).join("<br>") + "</p>"); paragraph.length = 0; };
+  const cells = function (line) { return line.trim().replace(/^\||\|$/g, "").split("|").map(function (cell) { return cell.trim(); }); };
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    if (!line.trim()) { flushParagraph(); continue; }
+    if (/^\s*```/.test(line)) {
+      flushParagraph(); const code = []; index += 1;
+      while (index < lines.length && !/^\s*```/.test(lines[index])) { code.push(lines[index]); index += 1; }
+      output.push("<pre><code>" + escapeHtml(code.join("\n")) + "</code></pre>"); continue;
+    }
+    if (line.indexOf("|") !== -1 && /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(lines[index + 1] || "")) {
+      flushParagraph(); const header = cells(line); const rows = []; index += 2;
+      while (index < lines.length && lines[index].trim() && lines[index].indexOf("|") !== -1) { rows.push(cells(lines[index])); index += 1; }
+      index -= 1;
+      output.push("<table><thead><tr>" + header.map(function (cell) { return "<th>" + markdownInline(cell) + "</th>"; }).join("") + "</tr></thead><tbody>" + rows.map(function (row) { return "<tr>" + header.map(function (_, cellIndex) { return "<td>" + markdownInline(row[cellIndex] || "") + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table>"); continue;
+    }
+    const heading = line.match(/^\s*(#{1,6})\s+(.+?)\s*#*\s*$/);
+    if (heading) { flushParagraph(); const level = heading[1].length; output.push("<h" + level + ">" + markdownInline(heading[2]) + "</h" + level + ">"); continue; }
+    if (/^\s*((\*\s*){3,}|(-\s*){3,}|(_\s*){3,})$/.test(line)) { flushParagraph(); output.push("<hr>"); continue; }
+    const list = line.match(/^\s*([-+*]|\d+\.)\s+(.+)$/);
+    if (list) {
+      flushParagraph(); const ordered = /\d/.test(list[1]); const tag = ordered ? "ol" : "ul"; const items = [];
+      while (index < lines.length) {
+        const item = lines[index].match(/^\s*([-+*]|\d+\.)\s+(.+)$/);
+        if (!item || /\d/.test(item[1]) !== ordered) break;
+        const task = item[2].match(/^\[([ xX])\]\s+(.+)$/);
+        items.push("<li>" + (task ? '<label><input type="checkbox" disabled' + (task[1].toLowerCase() === "x" ? " checked" : "") + "> " + markdownInline(task[2]) + "</label>" : markdownInline(item[2])) + "</li>"); index += 1;
+      }
+      index -= 1; output.push("<" + tag + ">" + items.join("") + "</" + tag + ">"); continue;
+    }
+    paragraph.push(line);
+  }
+  flushParagraph();
+  return output.join("");
+}
 
 function unwrap(raw) {
   const usersById = new Map((raw.users || []).map(function (user) { return [user.user_id, user]; }));
@@ -147,7 +197,8 @@ function renderActivity(taskId) {
   const statusHistory = state.projectStatusHistory.filter(function (item) { return String(item.task_id) === String(taskId); }).map(function (event) {
     const from = state.statuses.find(function (status) { return String(status.status_id) === String(event.from_status_id); });
     const to = state.statuses.find(function (status) { return String(status.status_id) === String(event.to_status_id); });
-    return { date: event.occurred_at, html: '<article class="activity-item timeline-item"><div class="activity-meta"><strong>' + escapeHtml(event.actor_login || "Project") + '</strong><time datetime="' + escapeHtml(event.occurred_at || "") + '">' + escapeHtml(formatDate(event.occurred_at)) + '</time></div><p class="activity-body">Moved from ' + escapeHtml(from ? from.status_name : "unknown") + ' to ' + escapeHtml(to ? to.status_name : "unknown") + '</p></article>' };
+    const text = event.note || "Moved from " + (from ? from.status_name : "unknown") + " to " + (to ? to.status_name : "unknown");
+    return { date: event.occurred_at, html: '<article class="activity-item timeline-item"><div class="activity-meta"><strong>' + escapeHtml(event.actor_login || "Project") + '</strong><time datetime="' + escapeHtml(event.occurred_at || "") + '">' + escapeHtml(formatDate(event.occurred_at)) + '</time></div><p class="activity-body">' + escapeHtml(text) + '</p></article>' };
   });
   const items = comments.concat(timeline, statusHistory).sort(function (a, b) { return new Date(b.date || 0) - new Date(a.date || 0); });
   if (items.length) return '<div class="activity-list">' + items.map(function (item) { return item.html; }).join("") + '</div>';
@@ -162,7 +213,7 @@ function openTask(taskId) {
   const details = state.issueDetails.find(function (item) { return String(item.task_id) === String(task.task_id); });
   const names = task.assignees.length ? task.assignees.map(function (user) { return escapeHtml(user.github_username); }).join(", ") : "Unassigned";
   const issueLabel = task.issue_state === "closed" ? "Closed" : "Open";
-  $("#modal-root").innerHTML = '<div class="modal-backdrop"><article class="modal issue-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-header"><div><p class="modal-kicker">Issue #' + task.github_issue_number + " · " + escapeHtml(projectRepo()) + '</p><h2 id="modal-title">' + escapeHtml(task.title) + '</h2><p class="issue-status"><span class="issue-state ' + (task.issue_state === "closed" ? "closed" : "") + '"></span>' + issueLabel + '</p></div><button type="button" class="modal-close" data-action="close-modal" aria-label="Close">×</button></div><div class="issue-section"><h3>Description</h3><p class="issue-body">' + escapeHtml(details && details.body || "No description available for this issue.") + '</p></div><div class="issue-section"><h3>Activity</h3>' + renderActivity(task.task_id) + '</div><dl class="modal-details"><div class="detail-row"><dt>Project status</dt><dd>' + escapeHtml(status ? status.status_name : "Unknown") + '</dd></div><div class="detail-row"><dt>Assignees</dt><dd>' + names + '</dd></div><div class="detail-row"><dt>Milestone</dt><dd>' + escapeHtml(milestone ? milestone.title : "None") + '</dd></div></dl><div class="modal-actions"><a class="control-button" href="' + escapeHtml(issueUrl(task)) + '" target="_blank" rel="noreferrer">Open in GitHub ↗</a></div></article></div>';
+  $("#modal-root").innerHTML = '<div class="modal-backdrop"><article class="modal issue-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-header"><div><p class="modal-kicker">Issue #' + task.github_issue_number + " · " + escapeHtml(projectRepo()) + '</p><h2 id="modal-title">' + escapeHtml(task.title) + '</h2><p class="issue-status"><span class="issue-state ' + (task.issue_state === "closed" ? "closed" : "") + '"></span>' + issueLabel + '</p></div><button type="button" class="modal-close" data-action="close-modal" aria-label="Close">×</button></div><div class="issue-section"><h3>Description</h3><div class="issue-body markdown-body">' + renderMarkdown(details && details.body || "No description available for this issue.") + '</div></div><div class="issue-section"><h3>Activity</h3>' + renderActivity(task.task_id) + '</div><dl class="modal-details"><div class="detail-row"><dt>Project status</dt><dd>' + escapeHtml(status ? status.status_name : "Unknown") + '</dd></div><div class="detail-row"><dt>Assignees</dt><dd>' + names + '</dd></div><div class="detail-row"><dt>Milestone</dt><dd>' + escapeHtml(milestone ? milestone.title : "None") + '</dd></div></dl><div class="modal-actions"><a class="control-button" href="' + escapeHtml(issueUrl(task)) + '" target="_blank" rel="noreferrer">Open in GitHub ↗</a></div></article></div>';
 }
 function closeModal() { $("#modal-root").innerHTML = ""; }
 async function persistStatus(task, previousStatusId) {
